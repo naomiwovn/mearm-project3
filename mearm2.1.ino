@@ -37,9 +37,9 @@ void setup()
 
 void loop()
 {
-
-  r_angle_th = 180+(-acos(r / (sqrt(r ^ 2 + z ^ 2))) - atan(z / r))*180/3.1416;
-  l_angle_p = (2 * atan(z / r) + acos(r / sqrt(r ^ 2 + z ^ 2)))*180/3.1416;
+  //Equations to calculate servo position for a given r & z coordinate
+  //r_angle_th = 180+(-acos(r / (sqrt(r ^ 2 + z ^ 2))) - atan(z / r))*180/3.1416;
+  //l_angle_p = (2 * atan(z / r) + acos(r / sqrt(r ^ 2 + z ^ 2)))*180/3.1416;
   
   int r_min_th = 173;
   int l_max_p = 120;
@@ -47,34 +47,23 @@ void loop()
   int r_home_th = 80;
   int l_home_p = 80;
 
-
   int r_max_th = 30;
   int l_min_th = 120;
-  
+
+  //move home
   servo_2.write(r_home_th);
   servo_1.write(l_home_p);
   delay(1000);
-
-//  while(1){
-//    
-//    
-//  }
   
-  
+  //move to max extend
   servo_2.write(r_min_th);
   servo_1.write(l_max_p);
   delay(1000);
 
+  //move to min extend
   servo_2.write(r_max_th);
   servo_1.write(l_min_th);
   delay(1000);
 
-  
-  
-    delay(15);
 }
-//##############################
 
-void move_to(int r, int z, int turnAngle) {
-
-}
