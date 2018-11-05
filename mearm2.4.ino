@@ -37,47 +37,78 @@ int l_ret_th = 120;
 Servo servo_L;
 Servo servo_R;
 Servo turn_servo;
+int servo_Lpin = 9;
+int servo_Rpin = 10;
+int turn_servo_pin = 6;
 
-int time_val = 0;
+int last_pos = 0;
+int j1y_pos = 0;
 ////////////////////
 
 void setup()
 {
-  servo_L.attach(9);    // Left-theta Pin-9
-  servo_R.attach(10);   // Right-phi Pin-10
-  turn_servo.attach(6); // Turn Pin-6
+  servo_L.attach(servo_Lpin);    // Left-theta Pin-9
+  servo_R.attach(servo_Rpin);   // Right-phi Pin-10
+  turn_servo.attach(turn_servo_pin); // Turn Pin-6
   Serial.begin(9600);// Initialize serial port
-  arm_move_home();
+
 }
 
 void loop()
 {
-  //save last position and move the servo to joy position
-  last_pos = joy_to_pos(joy_1y_pin,last_pos);//send servo last position to move from there
+  j1y_pos = joy_to_pos(joy_1y_pin);
+
+  if (j1y_pos < 90) {
+    move_down(turn_servo, j1y_pos, joy_1y_pin);
+  }
+  else if (j1y_pos > 90) {
+    move_up(turn_servo, j1y_pos, joy_1y_pin);
+  }
+  else {
+    turn_servo.write(90);
+  }
+
   delay(100);
-  
 }
 
-void move_to(Servo servo, int cur_pos, int new_pos) {
-  int i = cur_pos;
-  for (i = cur_pos; i < new_pos; i += 1) {
+void move_up(Servo servo, int pos, int joy_pin) {
+  int i = 90;
+  for (i = 90; i < pos; i++) {
+    servo.write(i);
+    delay(10);
+  }
+  while (pos > 90) {
+    pos = joy_to_pos(joy_pin);
+    servo.write(pos);
+  }
+}
+
+void move_down(Servo servo, int pos, int joy_pin) {
+  int i = 90;
+  for (i = 90; i > pos; i--) {
     servo.write(i);
     delay(10);
   }
 
+  while (pos < 90) {
+    pos = joy_to_pos(joy_pin);
+    servo.write(pos);
+  }
+
 }
 
-int joy_to_pos(int pin, int last_pos) {
+
+int joy_to_pos(int joy_pin) {
   int potpin = 0;
   int val;
-  val = analogRead(pin);
+  val = analogRead(joy_pin);
   Serial.print("joy: ");
   Serial.println(val);
   val = map(val, 0, 1023, 0, 180);
   Serial.print("pos: ");
   Serial.println(val);
-  move_to(turn_servo,last_pos,val);
-  return last_pos;
+  //  move_to(turn_servo, val);
+  return val;
 }
 
 void arm_move_home() {
@@ -85,6 +116,3 @@ void arm_move_home() {
   servo_L.write(l_home_th);
   delay(1000);
 }
-
-
-
