@@ -50,17 +50,20 @@ int l_angle_th;
 ////////////////////
 
 /////Absolute Distance////
-int zmin = 0;
-int zmax = 80;
+int l = 80;
+int zmin = -60;
+int zmax = 78;
 
-int rmin = 1;
-int rmax = 126;
+int rmin = 4;
+int rmax = 156;
 
 int r;
 int z;
 
-int z_atrmax = 1;
-int r_atzmax = 1;
+int z_atrmax = 0;
+int r_atzmax = 78;
+int z_atrmin = 0;
+int r_atzmin = 78;
 //////////////////////////
 
 
@@ -80,91 +83,70 @@ void loop()
   //turn_servo_move(joy_1x_pin);
   arm_move_home();
 
-  r = 20;
+  r = 156;
   z = 0;
-
-  if (r > rmax) {
-    r = rmax;
-  }
-  if (z > zmax) {
-    z = zmax;
-  }
-  if (r < rmin) {
-    r = rmin;
-  }
-  if (z < zmin) {
-    z = zmin;
-  }
-///////////////////////////
-  if(r == rmax){
-    z = z_atrmax;
-  }
-
-  if(z == zmax){
-    r = r_atzmax;
-  }
-////////////////////////////
-
-
-  r_angle_p = 120-(2 * atan(z / r) + acos(r / sqrt(pow(r, 2) + pow(z, 2)))) * 180 / 3.1416;
-  l_angle_th = 160 - (-acos(r / (sqrt(pow(r, 2) + pow(z, 2)))) - atan(z / r)) * 180 / 3.1416;
-  delay(15);
-
-  if (l_angle_th > r_angle_p - 17) {
-    l_angle_th = r_angle_p - 17;
-  }
-  Serial.print("MinR MaxZ---rphi: ");
-  Serial.print(r_angle_p);
-
-  Serial.print(" ltheta: ");
-  Serial.print(l_angle_th);
-  Serial.println();
-
+  
+  move_arm(r,z);
   delay(1000);
 
-  //move to max extend
-  servo_R.write(r_angle_p);
-  servo_L.write(l_angle_th);
-  delay(1000);
+  r=10;
+  z=72;
+  move_arm(r,z);
 
-
-  r = 50;
-  z = 10;
+  
 //////////////////////////
-  if (r > rmax) {
-    r = rmax;
-  }
-  if (z > zmax) {
-    z = zmax;
-  }
-  if (r < rmin) {
-    r = rmin;
-  }
-  if (z < zmin) {
-    z = zmin;
-  }
-///////////////////////////
-  if(r == rmax){
-    z = z_atrmax;
-  }
 
-  if(z == zmax){
-    r = r_atzmax;
-  }
+
+}
+void move_arm(int r, int z){
+  
+//  if (r >= rmax) {
+//    r = rmax;
+//    z = z_atrmax;
+//  }
+//  else if (z >= zmax) {
+//    z = zmax;
+//    r = r_atzmax;
+//  }
+//  else if (r <= rmin) {
+//    r = rmin;
+//    z = z_atrmin;
+//  }
+//  else if (z <= zmin) {
+//    z = zmin;
+//    r = r_atzmin;
+//  }
+
 ////////////////////////////
 
-  r_angle_p = 120-(2 * atan(z / r) + acos(r / sqrt(pow(r, 2) + pow(z, 2)))) * 180 / 3.1416;
-  l_angle_th = 100 - (-acos(r / (sqrt(pow(r, 2) + pow(z, 2)))) - atan(z / r)) * 180 / 3.1416;
+  //r_angle_p = 120-(2 * atan(z / r) + acos(r / sqrt(pow(r, 2) + pow(z, 2)))) * 180 / 3.1416;
+  //l_angle_th = 180 - (-acos(r / (sqrt(pow(r, 2) + pow(z, 2)))) - atan(z / r)) * 180 / 3.1416;
 
+  r_angle_p = 8*(2*(atan(z/r))+2*acos((pow(r,2)+pow(l,2))/(2*pow(l,2)))-1)* (180 / 3.1416);
+  l_angle_th = 180-(acos(((pow(r,2)+pow(l,2))/(2*pow(l,2)))-1)-atan(z/r))* (180 / 3.1416);
+  
+
+  //r_angle_p = acos((pow(r,2)+pow(l,2)/(2*pow(l,2)))-1)-atan(z/r)* 180 / 3.1416;
+  //l_angle_th = 180-2*atan(z/r)+2*acos((pow(r,2)+pow(l,2)/(2*pow(l,2)))-1)* 180 / 3.1416;
+  
   // The left arm cannot go past the right arm. Theres a screw blocking a certain
   // distance so the left arm cannot go within 17 degrees of the right arm
   delay(15);
-  if (l_angle_th > r_angle_p - 17) {
-    l_angle_th = 160 - r_angle_p - 17;
+
+  
+  if (l_angle_th > r_angle_p-15) {
+    l_angle_th = 180-r_angle_p-15 ;
+  }
+
+  if (l_angle_th > 140){
+    l_angle_th = 140;
   }
 
 
-  Serial.print("MaxR, MinZ--rphi: ");
+  Serial.print(r);
+  Serial.print(",");
+  Serial.print(z);
+  Serial.print("--rphi: ");
   Serial.print(r_angle_p);
 
   Serial.print(" ltheta: ");
@@ -180,9 +162,9 @@ void loop()
 }
 
 void turn_servo_move(int joy_1x_pin) {
-  delay(10);
-  j1x_pos = joy_to_pos(joy_1x_pin);
 
+  j1x_pos = joy_to_pos(joy_1x_pin);
+  delay(10);
   if (j1x_pos < 90) {
     move_right(turn_servo, j1x_pos, joy_1x_pin);
   }
@@ -226,7 +208,6 @@ void move_right(Servo servo, int pos, int joy_pin) {
 }
 
 int joy_to_pos(int joy_pin) {
-  int potpin = 0;
   int val;
   val = analogRead(joy_pin);
   Serial.print("joy: ");
